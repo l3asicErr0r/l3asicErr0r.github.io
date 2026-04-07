@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+    <title>FRC thingy</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <h1>FRC Alliance Scouting Dashboard</h1>
+
+    <nav>
+      <button onclick="showTab('teamLookup')">Team Lookup</button>
+      <button onclick="showTab('customAlliance')">Custom Alliance</button>
+      <button onclick="showTab('allianceBoard')">Alliance Board</button>
+      <button onclick="showTab('eventBrowser')">Event Browser</button>
+    </nav>
+
+    <div id="tab-teamLookup" class="tab-content">
+      <!-- Team Lookup Tab -->
+      <input id="teamInput" placeholder="Enter Team Number" />
+
+      <button onclick="getTeam()">Get Stats</button>
+
+      <select id="yearSelect" placeholder="Select Year"></select>
+
+      <span id="loadingIcon" class="loader" style="display: none"></span>
+
+      <p id="teamOutput"></p>
+    </div>
+
+    <div id="tab-customAlliance" class="tab-content">
+      <!-- Custom Alliance Tab -->
+      <input id="customTeam1" placeholder="Team 1" />
+      <input id="customTeam2" placeholder="Team 2" />
+      <input id="customTeam3" placeholder="Team 3" />
+
+      <button onclick="getCustomAlliance()">Get Alliance Stats</button>
+
+      <span id="customLoadingIcon" class="loader" style="display: none"></span>
+
+      <p id="customAllianceOutput"></p>
+    </div>
+
+    <div id="tab-allianceBoard" class="tab-content"></div>
+
+    <div id="tab-eventBrowser" class="tab-content"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
