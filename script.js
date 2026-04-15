@@ -1,3 +1,9 @@
+// global variables
+let currentTeam = null;
+let currentYear = new Date().getFullYear();
+let pinnedTeams = [];
+let currentTeamData = null;
+
 showTab("teamLookup"); // show the teamLookup tab on page load (default tab)
 function showTab(tabId) {
   // function showTab = Shows the selected tab and hides the others
@@ -26,11 +32,6 @@ function showTab(tabId) {
     document.getElementById("tab-eventBrowser").style.display = "block";
   }
 }
-
-// global variables
-
-let currentTeam = null;
-let currentYear = new Date().getFullYear();
 
 async function getTeam() {
   // function getTeam = fetches and displays team data based on user input
@@ -81,6 +82,7 @@ async function getTeam() {
 
     document.getElementById("teamOutput").innerHTML =
       // display team data in output
+      '<button id="pinButton" onclick="pinTeam()">Pin Team</button><br><br>' +
       `<strong>Team:</strong> ${data.team}<br>` +
       `<strong>Team Name:</strong> ${data.name}<br>` +
       `<strong>Rookie Year:</strong> ${data.rookie_year}<br>` +
@@ -88,6 +90,7 @@ async function getTeam() {
       `<strong>Auto EPA:</strong> ${data.epa.breakdown.auto_points}<br>` +
       `<strong>Teleop EPA:</strong> ${data.epa.breakdown.teleop_points}<br>` +
       `<strong>Wins:</strong> ${data.record.wins} | <strong>Losses:</strong> ${data.record.losses}`;
+    currentTeamData = data;
   } catch (error) {
     // display error message if fetch fails
     document.getElementById("teamOutput").textContent =
@@ -143,6 +146,15 @@ async function getCustomAlliance() {
       data2.epa.breakdown.total_points +
       data3.epa.breakdown.total_points;
 
+    const averageEPA = allianceEPA / 3;
+
+    //this function was partially written by Copilot
+    const bestTeam = [data1, data2, data3].reduce((max, team) => {
+      return team.epa.breakdown.total_points > max.epa.breakdown.total_points
+        ? team
+        : max;
+    });
+
     document.getElementById("customAllianceOutput").innerHTML =
       // display the data for all three teams and the total alliance EPA in the output
       `<strong>Team 1:</strong> ${data1.team} (${data1.name}) - EPA Norm: ${data1.epa.norm}<br>` +
@@ -157,13 +169,65 @@ async function getCustomAlliance() {
       `<strong>Total EPA:</strong> ${data3.epa.breakdown.total_points}<br>` +
       `<strong>Auto EPA:</strong> ${data3.epa.breakdown.auto_points}<br>` +
       `<strong>Teleop EPA:</strong> ${data3.epa.breakdown.teleop_points}<br><br>` +
-      `<strong>Total Alliance EPA:</strong> ${allianceEPA.toFixed(0)}`;
+      `<strong>Total Alliance EPA:</strong> ${allianceEPA.toFixed(0)}<br>` +
+      `<strong>Average Alliance EPA:</strong> ${averageEPA.toFixed(0)}<br>` +
+      `<strong>Highest Contributing Team:</strong> ${bestTeam.team} (${bestTeam.name}) - EPA: ${bestTeam.epa.breakdown.total_points}`;
   } catch (error) {
     document.getElementById("customAllianceOutput").textContent =
       "Error fetching alliance data: " + error.message;
   }
 
   loader.style.display = "none";
+}
+
+function pinTeam() {
+  if (currentTeamData === null) return;
+  if (pinnedTeams.some((team) => team.team === currentTeamData.team)) {
+    // check if the team is already pinned by comparing team numbers
+    alert("Team is already pinned.");
+  } else {
+    pinnedTeams.push({ ...currentTeamData, pinIndex: pinnedTeams.length });
+    renderPinnedTeams();
+  }
+}
+
+function renderPinnedTeams(teamData) {
+  const pinnedTeamsContainer = document.getElementById("pinnedTeams");
+  pinnedTeamsContainer.innerHTML = "";
+  pinnedTeams.forEach((team) => {
+    const teamElement = document.createElement("div");
+    teamElement.classList.add("pinned-team");
+    teamElement.innerHTML =
+      `<strong>Team:</strong> ${team.team} - ${team.name}<br>` +
+      `<strong>Rookie Year:</strong> ${team.rookie_year}<br>` +
+      `<strong>EPA (Current):</strong> ${team.epa.breakdown.total_points}<br>` +
+      `<strong>Auto EPA:</strong> ${team.epa.breakdown.auto_points}<br>` +
+      `<strong>Teleop EPA:</strong> ${team.epa.breakdown.teleop_points}<br>` +
+      `<strong>Wins:</strong> ${team.record.wins} | <strong>Losses:</strong> ${team.record.losses}<br>` +
+      '<button onclick="removePinnedTeam(' +
+      team.team +
+      ')">Remove</button>';
+    pinnedTeamsContainer.appendChild(teamElement);
+  });
+}
+
+function removePinnedTeam(teamNumber) {
+  pinnedTeams = pinnedTeams.filter((team) => team.team !== teamNumber);
+  renderPinnedTeams();
+}
+
+// the two functions below were partially written by Copilot
+async function sortPinnedTeams(parameter) {
+  pinnedTeams.sort((a, b) => {
+    if (parameter === "epa") {
+      return b.epa.breakdown.total_points - a.epa.breakdown.total_points;
+    } else if (parameter === "rookie_year") {
+      return b.rookie_year - a.rookie_year;
+    } else if (parameter === "pin_order") {
+      return a.pinIndex - b.pinIndex;
+    }
+  });
+  renderPinnedTeams();
 }
 
 for (let year = 2002; year <= currentYear; year++) {

@@ -23,9 +23,17 @@
 
       <select id="yearSelect" placeholder="Select Year"></select>
 
+      <select id="sortSelect" onchange="sortPinnedTeams(this.value)">
+        <option value="pin_order">Pin Order</option>
+        <option value="rookie_year">Rookie Year</option>
+        <option value="epa">EPA</option>
+      </select>
+
       <span id="loadingIcon" class="loader" style="display: none"></span>
 
       <p id="teamOutput"></p>
+
+      <div id="pinnedTeams"></div>
     </div>
 
     <div id="tab-customAlliance" class="tab-content">
